@@ -1,0 +1,55 @@
+# Lista delle operazioni disponibili
+operazioni = ["+", "-", "*", "/"]
+
+# Variabile per tenere la calcolatrice accesa
+continua = True
+
+# Ciclo principale della calcolatrice
+while continua:
+
+    # Chiedo il primo numero
+    num1 = float(input("Inserisci il primo numero: "))
+
+    # Stampo le operazioni disponibili
+    print("Scegli un'operazione:")
+    for op in operazioni:
+        print(op)
+
+    # Chiedo l'operazione
+    operazione = input("Operazione: ")
+
+    # Chiedo il secondo numero
+    num2 = float(input("Inserisci il secondo numero: "))
+
+    # Controllo quale operazione ha scelto l'utente
+    if operazione == "+":
+        risultato = num1 + num2
+
+    elif operazione == "-":
+        risultato = num1 - num2
+
+    elif operazione == "*":
+        risultato = num1 * num2
+
+    elif operazione == "/":
+        # Controllo per evitare la divisione per zero
+        if num2 != 0:
+            risultato = num1 / num2
+        else:
+            print("Errore: non si può dividere per zero")
+            continue
+
+    else:
+        print("Operazione non valida")
+        continue
+
+    # Stampo il risultato
+    print("Risultato:", risultato)
+
+    # Chiedo se vuole continuare
+    scelta = input("Vuoi fare un altro calcolo? (s/n): ")
+
+    if scelta != "s":
+        continua = False
+
+print("Calcolatrice chiusa")
