@@ -3,51 +3,47 @@ import threading
 
 # Disponibilità iniziale taxi
 disponibilita_taxi = 10
-lock = threading.Lock()
 
+# Funzione istanza di servizio
 def taxiInstance(conn, addr):
     global disponibilita_taxi
     print(f"Connessione stabilita con {addr}")
 
-    try:
-        while True:
-            data = conn.recv(1024).decode()
-            if not data:
-                break
+    while True:
+        # Ricezione dati dal client
+        data = conn.recv(1024).decode()
 
-            # Controllo formato messaggio
-            if "," not in data:
-                conn.send("Formato non valido. Usa: Partenza,Arrivo".encode())
-                continue
+        # Se il client chiude la connessione
+        if not data:
+            break
 
-            partenza, arrivo = data.split(",")
+        # Data contiene: città_partenza,città_arrivo
+        partenza, arrivo = data.split(",")
 
-            with lock:
-                if disponibilita_taxi > 0:
-                    disponibilita_taxi -= 1
-                    response = (
-                        f"Taxi disponibile!\n"
-                        f"Partenza: {partenza}\n"
-                        f"Arrivo: {arrivo}\n"
-                        f"Taxi rimanenti: {disponibilita_taxi}"
-                    )
-                else:
-                    response = "Nessun taxi disponibile al momento."
+        if disponibilita_taxi > 0:
+            disponibilita_taxi -= 1
+            response = (
+                "Taxi disponibile!\n"
+                f"Partenza: {partenza}\n"
+                f"Arrivo: {arrivo}\n"
+                f"Taxi rimanenti: {disponibilita_taxi}"
+            )
+        else:
+            response = "Nessun taxi disponibile."
 
-            conn.send(response.encode())
-
-    except Exception as e:
-        print("Errore:", e)
+        # Invio risposta al client
+        conn.send(response.encode())
 
     conn.close()
     print(f"Connessione terminata con {addr}")
 
 def start_server():
+    # Inizializzazione socket server
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('127.0.0.1', 12345))
     server_socket.listen(5)
 
-    print("🚖 Centrale Taxi attiva sulla porta 12345")
+    print("Server taxi in ascolto sulla porta 12345...")
 
     while True:
         conn, addr = server_socket.accept()
