@@ -1,87 +1,120 @@
-# Importiamo la libreria socket
 import socket
+# Importa la libreria socket per la comunicazione client-server
 
-# Importiamo la libreria threading
 import threading
+# Importa threading per gestire più client contemporaneamente
 
 
-# Funzione che gestisce ogni client
 def gestisci_client(client_socket):
+    # Funzione che gestisce il singolo client collegato
 
-    # Riceviamo il tipo di abbonamento
     abbonamento = client_socket.recv(1024).decode()
+    # Riceve il tipo di abbonamento dal client
+    # recv(1024) riceve massimo 1024 byte
+    # decode() trasforma i byte in stringa
 
-    # Riceviamo l'età del cliente
     eta = int(client_socket.recv(1024).decode())
+    # Riceve l'età dal client
+    # int() converte la stringa in numero intero
 
-    # Riceviamo il numero di corsi extra
     corsi = int(client_socket.recv(1024).decode())
+    # Riceve il numero di corsi extra
 
-    # Variabile per il prezzo base
     totale_base = 0
+    # Variabile che conterrà il costo base dell'abbonamento
 
-    # Controlliamo il tipo di abbonamento
     if abbonamento.lower() == "mensile":
+        # lower() trasforma il testo in minuscolo
+        # così "Mensile" e "mensile" vengono letti uguali
 
-        # Prezzo abbonamento mensile
         totale_base = 50
+        # Prezzo abbonamento mensile
 
     elif abbonamento.lower() == "annuale":
+        # Controlla se l'abbonamento è annuale
 
-        # Prezzo abbonamento annuale
         totale_base = 500
+        # Prezzo abbonamento annuale
 
-    # Ogni corso extra costa 20 euro
     costo_corsi = corsi * 20
+    # Ogni corso extra costa 20 euro
 
-    # Calcoliamo il totale iniziale
     totale = totale_base + costo_corsi
+    # Calcola il totale iniziale
 
-    # Se il cliente ha meno di 26 anni
     if eta < 26:
+        # Se il cliente ha meno di 26 anni
 
-        # Applichiamo sconto del 10%
         totale = totale - (totale * 0.10)
+        # Applica sconto del 10%
 
-    # Se il cliente ha più di 65 anni
     elif eta > 65:
+        # Se il cliente ha più di 65 anni
 
-        # Applichiamo sconto del 15%
         totale = totale - (totale * 0.15)
+        # Applica sconto del 15%
 
-    # Creiamo il messaggio finale
     messaggio = "Totale finale: " + str(totale) + " euro"
+    # Crea il messaggio finale da inviare al client
+    # str() converte il numero in stringa
 
-    # Inviamo il messaggio al client
-    client_socket.send(messaggio.encode())
+    client_socket.sendall(messaggio.encode())
+    # Invia il messaggio al client
+    # encode() converte la stringa in byte
 
-    # Chiudiamo la connessione con il client
     client_socket.close()
+    # Chiude la connessione con il client
 
 
-# Creiamo la socket del server
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def start_server():
+    # Funzione principale del server
 
-# Assegniamo IP e porta
-server.bind(("localhost", 5000))
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Crea il socket del server
+    # AF_INET = IPv4
+    # SOCK_STREAM = protocollo TCP
 
-# Mettiamo il server in ascolto
-server.listen()
+    server.bind(("127.0.0.1", 5000))
+    # Collega il server all'indirizzo IP e alla porta 5000
 
-# Messaggio di avvio server
-print("Server avviato...")
+    server.listen(5)
+    # Mette il server in ascolto
+    # 5 indica il numero massimo di connessioni in attesa
 
-# Ciclo infinito
-while True:
+    print("Server avviato sulla porta 5000...")
+    # Messaggio di avvio server
 
-    # Accettiamo la connessione del client
-    client_socket, address = server.accept()
+    while True:
+        # Ciclo infinito per accettare sempre nuovi client
 
-    # Stampiamo il client collegato
-    print("Client collegato:", address)
+        client_socket, address = server.accept()
+        # Accetta la connessione del client
+        # client_socket = socket dedicato al client
+        # address = indirizzo del client
 
-    # Creiamo un thread per il client
-    thread = threading.Thread(target=gestisci_client, args=(client_socket,))
+        print("Client collegato:", address)
+        # Stampa l'indirizzo del client collegato
 
-    # Avviamo il thread
-    thread.start()
+        thread = threading.Thread(
+            target=gestisci_client,
+            args=(client_socket,)
+        )
+        # Crea un thread
+        # target = funzione da eseguire
+        # args = parametri della funzione
+
+        thread.start()
+        # Avvia il thread
+        # Ogni client viene gestito separatamente
+
+    server.close()
+    # Chiude il server
+    # In realtà qui non verrà mai eseguito
+    # perché il while True è infinito
+
+
+if __name__ == "__main__":
+    # Controlla se il file è eseguito direttamente
+
+    start_server()
+    # Avvia il server
