@@ -1,35 +1,50 @@
-# Importiamo la libreria socket
 import socket
+# Importa la libreria socket
 
-# Creiamo la socket del client
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Ci colleghiamo al server
-client.connect(("localhost", 5000))
+def start_client():
+    # Funzione principale del client
 
-# Chiediamo il tipo di abbonamento
-abbonamento = input("Inserisci abbonamento (mensile/annuale): ")
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Crea il socket del client
+    # AF_INET = IPv4
+    # SOCK_STREAM = protocollo TCP
 
-# Chiediamo l'età
-eta = input("Inserisci età: ")
+    client.connect(("127.0.0.1", 5000))
+    # Connette il client al server
+    # 127.0.0.1 = localhost
+    # 5000 = porta del server
 
-# Chiediamo il numero di corsi extra
-corsi = input("Inserisci numero corsi extra: ")
+    abbonamento = input("Inserisci abbonamento (mensile/annuale): ")
+    # Chiede il tipo di abbonamento
 
-# Inviamo il tipo di abbonamento
-client.send(abbonamento.encode())
+    eta = input("Inserisci età: ")
+    # Chiede l'età
 
-# Inviamo l'età
-client.send(eta.encode())
+    corsi = input("Inserisci numero corsi extra: ")
+    # Chiede il numero di corsi extra
 
-# Inviamo il numero di corsi
-client.send(corsi.encode())
+    client.sendall(abbonamento.encode())
+    # Invia l'abbonamento al server
 
-# Riceviamo il messaggio finale dal server
-risposta = client.recv(1024).decode()
+    client.sendall(eta.encode())
+    # Invia l'età al server
 
-# Stampiamo il risultato
-print(risposta)
+    client.sendall(corsi.encode())
+    # Invia il numero di corsi al server
 
-# Chiudiamo la connessione
-client.close()
+    risposta = client.recv(1024).decode()
+    # Riceve la risposta dal server
+
+    print("Risposta dal server:", risposta)
+    # Stampa il messaggio ricevuto
+
+    client.close()
+    # Chiude la connessione
+
+
+if __name__ == "__main__":
+    # Controlla se il file viene eseguito direttamente
+
+    start_client()
+    # Avvia il client
